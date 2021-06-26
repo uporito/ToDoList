@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.adapter.ListAdapter
 import com.example.todolist.data.Datasource
@@ -34,6 +36,7 @@ class ChoixListActivity : AppCompatActivity(), View.OnClickListener {
 
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_list)
         recyclerView.adapter = ListAdapter(this, myDataset)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
         val btnOk = findViewById<Button>(R.id.nouvelle_liste_btn_ok)
         btnOk.setOnClickListener(this)
@@ -54,5 +57,17 @@ class ChoixListActivity : AppCompatActivity(), View.OnClickListener {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        // pour l'instant settings est le seul cas
+        R.id.action_settings -> {
+            startActivity(Intent(this, SettingsActivity::class.java))
+            true
+        }
+        else -> {
+            // exception
+            super.onOptionsItemSelected(item)
+        }
     }
 }

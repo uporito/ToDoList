@@ -33,7 +33,7 @@ class ListAdapter(
         return ListViewHolder(adapterLayout)
     }
 
-    override fun getItemCount() = dataset.size
+    override fun getItemCount() : Int = dataset.size
 
     /**
      * Remplace le contenu d'une view
