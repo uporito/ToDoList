@@ -5,11 +5,6 @@ import com.example.todolist.model.ListeToDo
 
 
 class Datasource {
-    fun loadLists() : List<ListeToDo> {
-        return listOf<ListeToDo>(
-            ListeToDo("Liste 1"),
-            ListeToDo("Liste 2"),
-            ListeToDo("Liste 3")
-        )
+    fun loadLists() {
     }
 }

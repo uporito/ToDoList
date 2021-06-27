@@ -1,11 +1,12 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/settings_header">
 
         <EditTextPreference
             android:key="pseudo"
             android:title="@string/pseudo_setting"
-            android:summary="true" />
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
