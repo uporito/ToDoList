@@ -15,16 +15,17 @@ import com.example.todolist.model.ListeToDo
 
 class ListAdapter(
         private val context : Context,
-        private val dataset : List<ListeToDo>
+        private val dataset : List<ListeToDo>,
+        private val listClickListener: OnListClickListener
 ) : RecyclerView.Adapter<ListAdapter.ListViewHolder>() {
 
     // Références vers les views de list_view
-    class ListViewHolder(private val view : View) : RecyclerView.ViewHolder(view) {
+    class ListViewHolder(val view : View) : RecyclerView.ViewHolder(view) {
         val textView : TextView = view.findViewById(R.id.list_title)
     }
 
     /**
-     * Créer des nouvelles views
+     * Créé des nouvelles views
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
         // create a new view
@@ -39,7 +40,14 @@ class ListAdapter(
      * Remplace le contenu d'une view
      */
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        val item = dataset[position]
-        holder.textView.text = item.listTitle
+        val list = dataset[position]
+        holder.textView.text = list.listTitle
+        holder.view.setOnClickListener {
+            listClickListener.onListClicked(list)
+        }
     }
+}
+
+interface OnListClickListener {
+    fun onListClicked(list: ListeToDo)
 }

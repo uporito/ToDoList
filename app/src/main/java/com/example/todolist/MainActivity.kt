@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -19,44 +20,52 @@ import com.example.todolist.adapter.ListAdapter
 import com.example.todolist.data.Datasource
 import com.example.todolist.model.ListeToDo
 
-const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
-
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-    private lateinit var sharedPreference : SharedPreferences
-    private lateinit var sharedPreferenceEditor : SharedPreferences.Editor
+    // définition des variables dont on se sert pour définir les fonctions
     private lateinit var textPseudo : TextView
+    private lateinit var btnOk : Button
+    private lateinit var sharedPrefs : SharedPreferences
+    private lateinit var sharedPrefsEditor: SharedPreferences.Editor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         // bouton OK
-        val btnOk = findViewById<Button>(R.id.pseudo_btn_ok)
-        val textPseudo = findViewById<TextView>(R.id.pseudo_input)
+        textPseudo = findViewById<TextView>(R.id.pseudo_input)
+        btnOk = findViewById<Button>(R.id.pseudo_btn_ok)
         btnOk.setOnClickListener(this)
 
-        // sauvegarde du pseudo
-        val sharedPreference : SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val sharedPreferenceEditor : SharedPreferences.Editor
+        // init préférences
+        sharedPrefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        sharedPrefsEditor = sharedPrefs.edit()
+        textPseudo.text = sharedPrefs.getString("pseudo", "none")
 
     }
 
     /**
      * Gestion du bouton OK
+     * écrase la valeur actuelle du pseudo
+     * et lance la choixListeActivity correspondante
      */
     override fun onClick(v: View?) {
-        // TODO:sauvegarder le pseudo dans les préférences
-        //with (sharedPreferenceEditor) {
-        //    putString("pseudo", textPseudo.text as String?)
-        //    apply()
-        //}
+        // sauvegarde le pseudo dans les préférences
+        sharedPrefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        sharedPrefsEditor = sharedPrefs.edit()
+        sharedPrefsEditor.putString("pseudo", textPseudo.text.toString())
+        sharedPrefsEditor.commit()
+
 
         // lance ChoixListActivity
+        val bdl = Bundle()
+        bdl.putString("pseudo", textPseudo.text.toString())
         val intent = Intent(this, ChoixListActivity::class.java)
-                // .apply { putExtra(EXTRA_MESSAGE, "msg")}
+            // .apply { putExtra("pseudo", textPseudo.text.toString())}
+        intent.putExtras(bdl)
         startActivity(intent)
     }
+
 
 
     /**
