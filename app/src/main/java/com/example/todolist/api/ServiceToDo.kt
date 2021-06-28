@@ -1,12 +1,11 @@
 package com.example.todolist.api
 
+import com.example.todolist.model.ItemResponse
+import com.example.todolist.model.ListeResponse
 import com.example.todolist.model.ListeToDo
 import com.example.todolist.model.Login
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ServiceToDo {
 
@@ -33,7 +32,27 @@ interface ServiceToDo {
     suspend fun authenticate(@Query("user") user: String,
                              @Query("password") password: String) : Login
 
-    @POST("authenticate")
+    @GET("lists")
     suspend fun getCurrentUserLists(@Header("hash") hash: String) : ListeResponse
+
+    @GET("lists/{idList}/items")
+    suspend fun getListItems(@Header("hash") hash: String,
+                             @Path("idList") idList: String) : ItemResponse
+
+    @PUT("lists/{idList}/items/{idItem}")
+    suspend fun checkItem(@Header("hash") hash: String,
+                          @Path("idList") idList: String,
+                          @Path("idItem") idItem: String,
+                          @Query("check") check : String)
+
+    @POST("lists/{idList}/items")
+    suspend fun newItem(@Header("hash") hash: String,
+                        @Path("idList") idList: String,
+                        @Query("label") label: String)
+
+    @POST("lists")
+    suspend fun newList(@Header("hash") hash: String,
+                        @Query("label") label: String)
+
 
 }

@@ -8,12 +8,14 @@ import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.model.ItemToDo
+import com.example.todolist.model.ListeToDo
 
 class ItemAdapter(
     private val context : Context,
-    private val dataset : List<ItemToDo>,
     private val itemClickListener: OnItemClickListener
 ) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
+
+    private val dataset : MutableList<ItemToDo> = mutableListOf()
 
     // Références vers les views de list_view
     class ItemViewHolder(val view : View) : RecyclerView.ViewHolder(view) {
@@ -27,7 +29,7 @@ class ItemAdapter(
         // create a new view
         val adapterLayout = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_view, parent, false)
-        return ItemAdapter.ItemViewHolder(adapterLayout)
+        return ItemViewHolder(adapterLayout)
     }
 
     override fun getItemCount() : Int = dataset.size
@@ -37,12 +39,19 @@ class ItemAdapter(
      */
     override fun onBindViewHolder(holder: ItemAdapter.ItemViewHolder, position: Int) {
         val item = dataset[position]
-        holder.cb.text = item.description
-        holder.cb.isChecked = item.fait
+        holder.cb.text = item.label
+        holder.cb.isChecked = (item.checked == "1")
         holder.view.setOnClickListener {
             itemClickListener.onItemClicked(holder.cb, position)
         }
     }
+
+    fun showData(newDataSet : List<ItemToDo>) {
+        dataset.clear()
+        dataset.addAll(newDataSet)
+        notifyDataSetChanged()
+    }
+
 }
 
 interface OnItemClickListener {
