@@ -1,6 +1,5 @@
 package com.example.todolist
 
-import android.content.ClipDescription
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
@@ -11,26 +10,30 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.adapter.ItemAdapter
-import com.example.todolist.adapter.ListAdapter
 import com.example.todolist.adapter.OnItemClickListener
-import com.example.todolist.model.ItemToDo
-import com.example.todolist.model.ListeToDo
-import com.example.todolist.model.ProfilListeTodo
-import com.google.gson.Gson
+import com.example.todolist.data.DataProvider
+import kotlinx.coroutines.*
 
 class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickListener {
 
+    private val activityScope = CoroutineScope(
+        SupervisorJob()
+                + Dispatchers.Main
+                + CoroutineExceptionHandler { _, throwable ->
+            Log.e("MainActivity", "CoroutineExceptionHandler : ${throwable.message}")
+        }
+    )
+
     // définition des variables dont on se sert pour définir les fonctions
-    private lateinit var gson : Gson
-    private lateinit var listeItem : ListeToDo
-    private lateinit var jsonListeItem : String
     private lateinit var recyclerItem : RecyclerView
-    private lateinit var titreListe : String
+    private lateinit var adapter : ItemAdapter
+    private lateinit var labelListe : String
+    private lateinit var idListe : String
     private lateinit var descriptionItem : EditText
     private lateinit var btnOk : Button
     private lateinit var pseudo : String
@@ -52,31 +55,43 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickL
         sharedPrefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this)
         sharedPrefsEditor = sharedPrefs.edit()
 
-        // Récupère le pseudo et la liste et affiche les items
+        // Récupère le label et l'id de la liste
         pseudo = sharedPrefs.getString("pseudo", "none").toString()
         val extras = this.intent.extras
         if (extras != null) {
             //pseudo = extras.getString("pseudo").toString()
-            titreListe = extras.getString("titreListe").toString()
+            labelListe = extras.getString("labelListe").toString()
+            idListe = extras.getString("idListe").toString()
         }
-
-        // récupère une représentation de la liste et de ses items
-        // à partir d'un json en utilisant gson
-        gson = Gson()
-        jsonListeItem = sharedPrefs.getString(Pair(pseudo, titreListe).toString(),
-            "{\"titre\": $titreListe\", \"lesItems\": []}"
-        ).toString()
-        Log.i("jsonliste1", jsonListeItem)
-        listeItem = gson.fromJson(jsonListeItem, ListeToDo::class.java)
 
         // recycler view
         recyclerItem = findViewById<RecyclerView>(R.id.recycler_item)
-        recyclerItem.adapter = ItemAdapter(this, listeItem.lesItems, this)
+        adapter = ItemAdapter(this, this)
+        recyclerItem.adapter = adapter
         recyclerItem.layoutManager = LinearLayoutManager(this)
 
-        // Set titre action bar à la liste actuelle
-        getSupportActionBar()?.setTitle(titreListe)
+        getItems()
 
+        // Set titre action bar à la liste actuelle
+        getSupportActionBar()?.setTitle(labelListe)
+
+    }
+
+    /**
+     * Récupération des listes de l'utilisateur actuel auprès de l'API
+     * et actualisation de l'affichage
+     */
+    private fun getItems() {
+        try {
+            activityScope.launch {
+                var hash = sharedPrefs.getString("hash", "nohash").toString()
+                var items = DataProvider.getListItems(hash, idListe)
+                adapter.showData(items)
+                recyclerItem.visibility = View.VISIBLE
+            }
+        } catch(e: Exception){
+            Toast.makeText(this@ShowListActivity, "${e.message} ", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
@@ -84,35 +99,34 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickL
      * ajoute un nouvel item dont la description est le texte du champ nouvel item
      */
     override fun onClick(v: View?) {
-        if (v != null) {
-            when (v.id) {
-                R.id.nouvel_item_btn_ok-> {
-                    if (descriptionItem.text.toString().isNotEmpty()) {
-                        listeItem.lesItems.add(ItemToDo(descriptionItem.text.toString()))
-                        jsonListeItem = gson.toJson(listeItem)
-                        Log.i("jsonliste1", jsonListeItem)
-                        sharedPrefsEditor.putString(Pair(pseudo, titreListe).toString(), jsonListeItem)
-                        sharedPrefsEditor.commit()
-                        recyclerItem.adapter = ItemAdapter(this, listeItem.lesItems, this)
-                    }
-                }
+        try {
+            activityScope.launch {
+                var hash = sharedPrefs.getString("hash", "nohash").toString()
+                var label = descriptionItem.text.toString()
+                DataProvider.newItem(hash, idListe, label)
+                getItems()
             }
+        } catch(e: Exception){
+            Toast.makeText(this@ShowListActivity, "${e.message} ", Toast.LENGTH_SHORT).show()
         }
     }
 
     /**
      * Gestion click sur un item
      * change l'état de la cb
-     * et update l'objet avec gson
      */
     override fun onItemClicked(v: View, pos: Int) {
-        val checkBox = v as CheckBox
-        val item = listeItem.lesItems[pos]
-        item.fait = checkBox.isChecked
-        jsonListeItem = gson.toJson(listeItem)
-        Log.i("jsonliste1", jsonListeItem)
-        sharedPrefsEditor.putString(Pair(pseudo, titreListe).toString(), jsonListeItem)
-        sharedPrefsEditor.commit()
+        try {
+            activityScope.launch {
+                var hash = sharedPrefs.getString("hash", "nohash").toString()
+                var items = DataProvider.getListItems(hash, idListe)
+                val item = items[pos]
+                if (item.checked == "1") { DataProvider.checkItem(hash, idListe, item.id, "0") }
+                else { DataProvider.checkItem(hash, idListe, item.id, "1") }
+            }
+        } catch(e: Exception){
+            Toast.makeText(this@ShowListActivity, "${e.message} ", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
@@ -135,7 +149,5 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickL
             super.onOptionsItemSelected(item)
         }
     }
-
-
 
 }

@@ -15,9 +15,10 @@ import com.example.todolist.model.ListeToDo
 
 class ListAdapter(
         private val context : Context,
-        private val dataset : List<ListeToDo>,
         private val listClickListener: OnListClickListener
 ) : RecyclerView.Adapter<ListAdapter.ListViewHolder>() {
+
+    private val dataset: MutableList<ListeToDo> = mutableListOf()
 
     // Références vers les views de list_view
     class ListViewHolder(val view : View) : RecyclerView.ViewHolder(view) {
@@ -41,11 +42,18 @@ class ListAdapter(
      */
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         val list = dataset[position]
-        holder.textView.text = list.titre
+        holder.textView.text = list.label
         holder.view.setOnClickListener {
             listClickListener.onListClicked(list)
         }
     }
+
+    fun showData(newDataSet : List<ListeToDo>) {
+        dataset.clear()
+        dataset.addAll(newDataSet)
+        notifyDataSetChanged()
+    }
+
 }
 
 interface OnListClickListener {

@@ -13,12 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.todolist.adapter.ListAdapter
 import com.example.todolist.data.DataProvider
-import com.example.todolist.model.ListeToDo
-import com.google.gson.Gson
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -58,11 +53,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         sharedPrefsEditor = sharedPrefs.edit()
         textPseudo.text = sharedPrefs.getString("pseudo", "none")
 
-        var gson = Gson()
-        //var lists = DataProvider.getListsFromApi()
-        //var jsonLists = gson.toJson(lists)
-        //Log.d("apirequest", jsonLists)
-
     }
 
     /**
@@ -73,11 +63,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
 
         login()
-
-        // lance ChoixListActivity en lui passant le pseudo actuel
-        val intent = Intent(this, ChoixListActivity::class.java)
-            // .apply { putExtra("pseudo", textPseudo.text.toString())}
-        startActivity(intent)
 
     }
 
@@ -94,13 +79,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val hash = DataProvider.authenticate(pseudo, pass)
                 Log.i("apirequest", "hash : $hash")
 
-                // sauvegarde le pseudo dans les préférences
-                sharedPrefsEditor.putString("pseudo", pseudo)
-                sharedPrefsEditor.commit()
+                if (!hash.isEmpty()) {
+                    // sauvegarde le pseudo dans les préférences
+                    sharedPrefsEditor.putString("pseudo", pseudo)
+                    sharedPrefsEditor.commit()
 
-                // stockage du hash dans les préférences
-                sharedPrefsEditor.putString("hash", hash)
-                sharedPrefsEditor.commit()
+                    // stockage du hash dans les préférences
+                    sharedPrefsEditor.putString("hash", hash)
+                    sharedPrefsEditor.commit()
+
+                    // lance ChoixListActivity en lui passant le pseudo actuel
+                    Toast.makeText(this@MainActivity, "Connexion réussie", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@MainActivity, ChoixListActivity::class.java)
+                    // .apply { putExtra("pseudo", textPseudo.text.toString())}
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@MainActivity, "erreur de connexion", Toast.LENGTH_SHORT).show()
+                }
 
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, "${e.message}", Toast.LENGTH_SHORT).show()
