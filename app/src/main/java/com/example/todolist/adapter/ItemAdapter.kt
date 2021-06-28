@@ -38,7 +38,7 @@ class ItemAdapter(
     override fun onBindViewHolder(holder: ItemAdapter.ItemViewHolder, position: Int) {
         val item = dataset[position]
         holder.cb.text = item.description
-        holder.cb.isChecked = item.etat
+        holder.cb.isChecked = item.fait
         holder.view.setOnClickListener {
             itemClickListener.onItemClicked(holder.cb, position)
         }

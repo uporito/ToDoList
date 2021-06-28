@@ -8,6 +8,11 @@
             android:title="@string/pseudo_setting"
             app:useSimpleSummaryProvider="true" />
 
+        <EditTextPreference
+            android:key="hash"
+            android:title="@string/hash_setting"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

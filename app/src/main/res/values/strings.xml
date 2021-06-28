@@ -1,15 +1,12 @@
 <resources>
     <string name="app_name">To Do List</string>
-    <string name="setting_titre_pseudo">Pseudo</string>
     <string name="hint_nouvelle_liste">Nouvelle Liste</string>
     <string name="nouvelle_liste_ok">OK</string>
     <string name="hint_pseudo">Pseudo</string>
+    <string name="hint_pass">password</string>
     <string name="pseudo_ok">OK</string>
     <string name="hint_nouvel_item">Nouvel Item</string>
 
-    <string name="titre_liste_1">Liste 1</string>
-    <string name="titre_liste_2">Liste 2</string>
-    <string name="titre_liste_3">Liste 3</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
@@ -18,5 +15,6 @@
     <!-- Messages Preferences -->
     <string name="pseudo_setting">Pseudo</string>
     <string name="menu_settings">Settings</string>
+    <string name="hash_setting">Hash</string>
 
 </resources>

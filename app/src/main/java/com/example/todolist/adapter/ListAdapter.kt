@@ -41,7 +41,7 @@ class ListAdapter(
      */
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         val list = dataset[position]
-        holder.textView.text = list.listTitle
+        holder.textView.text = list.titre
         holder.view.setOnClickListener {
             listClickListener.onListClicked(list)
         }
