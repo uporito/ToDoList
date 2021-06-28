@@ -20,7 +20,7 @@ import com.example.todolist.adapter.ListAdapter
 import com.example.todolist.adapter.OnItemClickListener
 import com.example.todolist.model.ItemToDo
 import com.example.todolist.model.ListeToDo
-import com.example.todolist.model.UserListeTodo
+import com.example.todolist.model.ProfilListeTodo
 import com.google.gson.Gson
 
 class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickListener {
@@ -40,6 +40,8 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickL
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.show_list_activity)
+
+        Log.i("appactivity", "SLA start")
 
         // références vues et set click listener
         descriptionItem = findViewById<EditText>(R.id.nouvel_item_input)
@@ -62,14 +64,14 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickL
         // à partir d'un json en utilisant gson
         gson = Gson()
         jsonListeItem = sharedPrefs.getString(Pair(pseudo, titreListe).toString(),
-            "{\"listTitle\": $titreListe\", \"listItems\": []}"
+            "{\"titre\": $titreListe\", \"lesItems\": []}"
         ).toString()
         Log.i("jsonliste1", jsonListeItem)
         listeItem = gson.fromJson(jsonListeItem, ListeToDo::class.java)
 
         // recycler view
         recyclerItem = findViewById<RecyclerView>(R.id.recycler_item)
-        recyclerItem.adapter = ItemAdapter(this, listeItem.listItems, this)
+        recyclerItem.adapter = ItemAdapter(this, listeItem.lesItems, this)
         recyclerItem.layoutManager = LinearLayoutManager(this)
 
         // Set titre action bar à la liste actuelle
@@ -79,27 +81,34 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, OnItemClickL
 
     /**
      * Gestion click sur le bouton ok
-     * ajoute une nouvelle liste dont le titre est le texte du champ nouvelle liste
+     * ajoute un nouvel item dont la description est le texte du champ nouvel item
      */
     override fun onClick(v: View?) {
         if (v != null) {
             when (v.id) {
                 R.id.nouvel_item_btn_ok-> {
-                    listeItem.listItems.add(ItemToDo(descriptionItem.text.toString()))
-                    jsonListeItem = gson.toJson(listeItem)
-                    Log.i("jsonliste1", jsonListeItem)
-                    sharedPrefsEditor.putString(Pair(pseudo, titreListe).toString(), jsonListeItem)
-                    sharedPrefsEditor.commit()
-                    recyclerItem.adapter = ItemAdapter(this, listeItem.listItems, this)
+                    if (descriptionItem.text.toString().isNotEmpty()) {
+                        listeItem.lesItems.add(ItemToDo(descriptionItem.text.toString()))
+                        jsonListeItem = gson.toJson(listeItem)
+                        Log.i("jsonliste1", jsonListeItem)
+                        sharedPrefsEditor.putString(Pair(pseudo, titreListe).toString(), jsonListeItem)
+                        sharedPrefsEditor.commit()
+                        recyclerItem.adapter = ItemAdapter(this, listeItem.lesItems, this)
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Gestion click sur un item
+     * change l'état de la cb
+     * et update l'objet avec gson
+     */
     override fun onItemClicked(v: View, pos: Int) {
         val checkBox = v as CheckBox
-        val item = listeItem.listItems[pos]
-        item.etat = checkBox.isChecked
+        val item = listeItem.lesItems[pos]
+        item.fait = checkBox.isChecked
         jsonListeItem = gson.toJson(listeItem)
         Log.i("jsonliste1", jsonListeItem)
         sharedPrefsEditor.putString(Pair(pseudo, titreListe).toString(), jsonListeItem)
